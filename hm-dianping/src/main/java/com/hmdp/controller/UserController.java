@@ -45,9 +45,10 @@ public class UserController {
      * @param loginForm 登录参数，包含手机号、验证码；或者手机号、密码
      */
     @PostMapping("/login")
+    //@RequestBody接收前端的json格式参数，用户信息和校验存在session
     public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session){
-        // TODO 实现登录功能
-        return Result.fail("功能未完成");
+        //实现登录功能
+        return userService.login(loginForm,session);
     }
 
     /**
