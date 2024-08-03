@@ -2,6 +2,7 @@ package com.hmdp.utils;
 
 /**
  * @author 虎哥
+ * 手机号的正则表达式
  */
 public abstract class RegexPatterns {
     /**
