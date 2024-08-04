@@ -2,6 +2,9 @@ package com.hmdp.utils;
 
 import com.hmdp.dto.UserDTO;
 
+/**
+ * 定义了ThreadLocal常量
+ */
 public class UserHolder {
     private static final ThreadLocal<UserDTO> tl = new ThreadLocal<>();
 
