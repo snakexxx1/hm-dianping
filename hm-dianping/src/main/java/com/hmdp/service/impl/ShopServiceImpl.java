@@ -10,10 +10,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.netty.util.internal.StringUtil;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.hmdp.utils.RedisConstants.CACHE_SHOP_KEY;
+import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TTL;
 
 /**
  * <p>
@@ -52,9 +56,27 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
        }
         //6.存在，写入redis中
         // JSONUtil.toJsonStr将一个Java对象（比如一个实体类实例）转换成JSON格式的字符串
-       stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(shop));
+       stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(shop) , CACHE_SHOP_TTL , TimeUnit.MINUTES);
         //7.返回
        return Result.ok(shop);
 
+    }
+
+    /**
+     * 更新店铺信息
+     * @param shop
+     * @return
+     */
+    @Transactional
+    public Result update(Shop shop) {
+        Long id = shop.getId();
+        if(id == null){
+            return Result.fail("店铺id不能为空");
+        }
+        //1.更新数据库
+       updateById(shop);
+        //2.删除缓存
+       stringRedisTemplate.delete(CACHE_SHOP_KEY + id);
+        return Result.ok();
     }
 }
