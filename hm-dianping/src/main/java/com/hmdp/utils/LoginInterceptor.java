@@ -18,11 +18,12 @@ import java.util.concurrent.TimeUnit;
  * 拦截器
  */
 public class LoginInterceptor implements HandlerInterceptor {
-    private StringRedisTemplate stringRedisTemplate;
+
+  /*  private StringRedisTemplate stringRedisTemplate;
 
     public LoginInterceptor(StringRedisTemplate stringRedisTemplate){
         this.stringRedisTemplate = stringRedisTemplate;
-    }
+    }*/
 
     //拦截器放行前逻辑
     @Override
@@ -32,7 +33,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         //2.获取session中的用户
         // Object user = session.getAttribute("user");
 
-        //1.获取请求头中的token
+       /* //1.获取请求头中的token
         String token = request.getHeader("authorization");
         //StrUtil.isBlank判断是否为空
         if (StrUtil.isBlank(token)) {
@@ -57,12 +58,24 @@ public class LoginInterceptor implements HandlerInterceptor {
         //7.刷新token有效期
         stringRedisTemplate.expire(key , RedisConstants.CACHE_SHOP_TTL , TimeUnit.MINUTES);
         //7.放行
+        return true;*/
+
+
+        // 1.判断是否需要拦截（ThreadLocal中是否有用户）
+        if (UserHolder.getUser() == null) {
+            // 没有，需要拦截，设置状态码
+            response.setStatus(401);
+            // 拦截
+            return false;
+        }
+        // 有用户，则放行
         return true;
+
     }
 
-    @Override
+/*    @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
        //移除用户
         UserHolder.removeUser();
-    }
+    }*/
 }
