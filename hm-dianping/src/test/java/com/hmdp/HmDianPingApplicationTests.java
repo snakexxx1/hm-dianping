@@ -10,13 +10,13 @@ import javax.annotation.Resource;
 @SpringBootTest
 class HmDianPingApplicationTests {
 
-    // 新增此方法，利用单元测试进行缓存预热
+   /* // 新增此方法，利用单元测试进行缓存预热
     @Resource
     private ShopServiceImpl shopService;
 
    @Test
     void testSaveShop(){
         shopService.saveShop2Redis(1L,10l);
-    }
+    }*/
 
 }
