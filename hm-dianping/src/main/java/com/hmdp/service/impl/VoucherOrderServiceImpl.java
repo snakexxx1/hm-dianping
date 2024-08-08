@@ -62,7 +62,6 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
         //先获取锁，在提交方法
         Long userId = UserHolder.getUser().getId();
-        //为下面方法添加锁 .intern可以确保用户id一样时候，锁的就是一样
         //创建锁对象(新增代码)
         SimpleRedisLock lock = new SimpleRedisLock("order:" + userId, stringRedisTemplate);
         //获取锁对象
