@@ -81,7 +81,7 @@ public class Voucher implements Serializable {
     /**
      * 生效时间
      */
-    @TableField(exist = false)
+    @TableField(exist = false) //标记实体类字段不与数据库表字段对应的注解
     private LocalDateTime beginTime;
 
     /**

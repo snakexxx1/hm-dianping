@@ -10,15 +10,25 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisIdWorker;
 import com.hmdp.utils.SimpleRedisLock;
 import com.hmdp.utils.UserHolder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Lock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * <p>
@@ -29,7 +39,8 @@ import java.time.LocalDateTime;
  * @since 2021-12-22
  */
 @Service
-public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, VoucherOrder> implements IVoucherOrderService {
+@Slf4j
+public  class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, VoucherOrder> implements IVoucherOrderService {
     @Resource
     private ISeckillVoucherService seckillVoucherService;
     @Resource
@@ -41,13 +52,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private RedissonClient redissonClient;
 
 
-    /**
-     * 实现下单业务
-     *
-     * @param voucherId
-     * @return
-     */
-    public Result setKillVoucher(Long voucherId) {
+   public Result setKillVoucher(Long voucherId) {
         // 1.查询优惠券
         SeckillVoucher voucher = seckillVoucherService.getById(voucherId);
         // 2.判断秒杀是否开始
