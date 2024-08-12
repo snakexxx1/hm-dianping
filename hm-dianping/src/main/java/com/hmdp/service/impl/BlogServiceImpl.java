@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.Blog;
+import com.hmdp.entity.Follow;
 import com.hmdp.entity.User;
 import com.hmdp.mapper.BlogMapper;
 import com.hmdp.service.IBlogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmdp.service.IFollowService;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.SystemConstants;
 import com.hmdp.utils.UserHolder;
@@ -40,6 +42,8 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     private IUserService userService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private IFollowService followService;
 
     //根据用户查询
     @Override
@@ -145,6 +149,35 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         return Result.ok(userDTOS);
 
     }
+
+    //保存探店笔记、并推消息
+    public Result saveBlog(Blog blog) {
+        // 1.获取登录用户
+        UserDTO user = UserHolder.getUser();
+        blog.setUserId(user.getId());
+        // 2.保存探店笔记
+        boolean isSuccess = save(blog);
+        if(!isSuccess){
+            return Result.fail("新增笔记失败!");
+        }
+        // 3.查询笔记作者的所有粉丝 select * from tb_follow where follow_user_id = ?
+        List<Follow> follows = followService.query().eq("follow_user_id", user.getId()).list();
+      /* 注意： 步骤3中，user.getId是现在登录的用户，想获取自己的粉丝，就要sql条件结果等于follow_user_id
+        我是1010，点击关注了2号；反过来2号登录 判断follow_user_id 等于2号 就是获取了粉丝
+       所以 UserId就是粉丝id*/
+        // 4.推送笔记id给所有粉丝
+        for (Follow follow : follows) {
+            // 4.1.获取粉丝id
+            Long userId = follow.getUserId();
+            // 4.2.推送
+            String key = "feed:" + userId;
+           stringRedisTemplate.opsForZSet().add(key, blog.getId().toString(), System.currentTimeMillis());
+        }
+        // 5.返回id
+        return Result.ok(blog.getId());
+    }
+
+
 
     private void queryBlogUser(Blog blog){
         Long userId = blog.getUserId();
