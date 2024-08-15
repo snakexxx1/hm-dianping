@@ -20,4 +20,6 @@ public interface IUserService extends IService<User> {
     Result sendCode(String phone, HttpSession session);
     //实现登录功能
     Result login(LoginFormDTO loginForm, HttpSession session);
+
+    Result sign();
 }
