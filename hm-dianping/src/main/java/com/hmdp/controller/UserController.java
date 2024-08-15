@@ -112,4 +112,13 @@ public class UserController {
         return userService.sign();
     }
 
+    /**
+     * 实现签到统计
+     * @return
+     */
+    @GetMapping("/sign/count")
+    public Result signCount(){
+        return userService.signCount();
+    }
+
 }
